@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Face Recognition",
+    "version": "1.0",
+    "description": "Recognize faces in images",
+    "content_scripts": [
+        {
+          "js": ["scripts/content.js"],
+          "matches": ["<all_urls>"]
+        }
+      ],
+    "web_accessible_resources": [{
+      "resources": ["modules/*", "models/*", "html/*"],
+      "matches": ["<all_urls>"]
+    }],
+    "host_permissions": [
+      "<all_urls>"
+     ]
+  }
