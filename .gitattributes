@@ -1,0 +1,10 @@
+models/age_gender_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/face_landmark_68_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/tiny_face_detector_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/face_expression_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/face_landmark_68_tiny_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/face_recognition_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/face_recognition_model-shard2 filter=lfs diff=lfs merge=lfs -text
+models/mtcnn_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/ssd_mobilenetv1_model-shard1 filter=lfs diff=lfs merge=lfs -text
+models/ssd_mobilenetv1_model-shard2 filter=lfs diff=lfs merge=lfs -text
