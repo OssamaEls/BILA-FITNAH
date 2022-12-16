@@ -102,3 +102,13 @@
     console.log('face recognition app loaded!')
 })()
 
+
+// const computedStyle = window.getComputedStyle(existingElement);
+
+// // Create the new element
+// const newElement = document.createElement('div');
+
+// // Loop through the computed style properties and apply them to the new element
+// for (const prop of computedStyle) {
+//   newElement.style[prop] = computedStyle[prop];
+// }
