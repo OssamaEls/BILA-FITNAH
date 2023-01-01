@@ -10,7 +10,7 @@
         }
       ],
     "web_accessible_resources": [{
-      "resources": ["modules/*", "models/*", "html/*"],
+      "resources": ["modules/*", "models/*", "iframe-helper/*"],
       "matches": ["<all_urls>"]
     }],
     "host_permissions": [

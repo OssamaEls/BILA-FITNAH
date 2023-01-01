@@ -64,6 +64,7 @@
                                 }
                         } catch (err) {
                                 console.log(err)
+                                console.log('image could not be loaded!', image)
                         }
                 }
         };
