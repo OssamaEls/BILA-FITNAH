@@ -36,94 +36,122 @@
     const seenImages = []
     const numImageMap = new Object()
     var num = 0
-    detectFaces(document.images)
 
+    console.log('sending images')
+    sendImages(document.images)
+    console.log('images sent')
 
     const mutationObserver = new MutationObserver((mutationRecords) => {
         for (let mutationRecord of mutationRecords) {
             let images = mutationRecord.target.querySelectorAll('img')
-            if (images.length) { console.log('new images detected') }
-            detectFaces(images)
+            if (images.length > 0) { console.log('new images detected') }
+            sendImages(images)
         }
     })
 
     mutationObserver.observe(document.body, { childList: true, subtree: true })
 
+    window.onmessage = (e) => {
+        if (typeof Array.isArray(e.data) && e.data.length === 2 && e.data[1].startsWith('bila-fitnah-')) {
+            let [boxes, numKey] = e.data
+            console.log('boxes are', boxes)
+            let image = numImageMap[numKey]
+            // console.log('image is', image)
+            let parent = image.parentNode
+            let parentStyle = window.getComputedStyle(parent)
+            // console.log('parent is', parent)
+            let wrapper = document.createElement('div')
+            wrapper.height = image.height
+            wrapper.width = image.width
+            wrapper.style.margin = image.margin
+            wrapper.style.padding = image.padding
+            console.log('image width and height (0)', image.width, image.height)
+            parent.replaceChild(wrapper, image)
+            // image.crossOrigin = 'anonymous'
+            wrapper.appendChild(image)
+            image.width = wrapper.width
+            image.height = wrapper.height
+            let canvas = document.createElement('canvas')
+            wrapper.appendChild(canvas)
+            parent.style = parentStyle
+            console.log('wrapper width and height', wrapper.width, wrapper.height)
+            wrapper.style.cssText = 'display:inline-block;position:relative;'
+            image.style.cssText = 'position:absolute;z-index:1;'
+            canvas.style.cssText = 'position:relative;z-index:2;'
+            // canvas.style.cssText = 'position:absolute;top:0;left:0;'
+            canvas.width = wrapper.width
+            canvas.height = wrapper.height
+            console.log('image width and height (1)', image.width, image.height)
+            let ctx = canvas.getContext('2d')
+            ctx.fillStyle = "black";
+            if (image.complete) {
+                for (let box of boxes) {
+                    console.log('box is', box)
+                    // if (detection.gender === 'male') {
+                    //     console.log('gender is male')
+                    // }
+                    ctx.fillRect(box._x, box._y, box._width, box._height);
+                    // ctx.fillRect(0, 0 , canvas.width, canvas.height)
+                    console.log('coordinates', box.x, box.y)
+                    console.log('canvas width and height', canvas.width, canvas.height)
+                    console.log('image width and height', image.width, image.height)
+                    // console.log('wrapper width and height', wrapper.width, wrapper.height)
+                    // console.log('box width and height', box.width, box.height)
+                }
+            } else {
+                image.onload = () => {
+                    for (let box of boxes) {
+                        console.log('box is', box)
+                        // if (detection.gender === 'male') {
+                        //     console.log('gender is male')
+                        // }
+                        ctx.fillRect(box._x, box._y, box._width, box._height);
+                        // ctx.fillRect(0, 0 , canvas.width, canvas.height)
+                        // console.log(fullFaceDescriptions)
+                        console.log('coordinates', box.x, box.y)
+                        console.log('canvas width and height', canvas.width, canvas.height)
+                        console.log('image width and height', image.width, image.height)
+                        // console.log('wrapper width and height', wrapper.width, wrapper.height)
+                        // console.log('box width and height', box.width, box.height)
+                    }
+                }
+            }
+        }
+    }
+
     // iterate through all images on the page
     // and draw a box around each face
-    async function detectFaces(images) {
+    async function sendImages(images) {
         for (let image of images) {
             if (!seenImages.includes(image)) {
                 seenImages.push(image)
                 ++num
                 try {
-                    let parent = image.parentNode
-                    let parentStyle = window.getComputedStyle(parent)
-                    console.log('parent is', parent)
-                    let wrapper = document.createElement('div')
-                    wrapper.height = image.height
-                    wrapper.width = image.width
-                    wrapper.style.margin = image.margin
-                    wrapper.style.padding = image.padding
-                    numImageMap[num] = image 
-                    console.log('image width and height (0)', image.width, image.height)
-                    parent.replaceChild(wrapper, image)
-                    // image.crossOrigin = 'anonymous'
-                    wrapper.appendChild(image)
-                    image.width = wrapper.width
-                    image.height = wrapper.height
                     await waitForElement(`#${ifrId}`)
-                    ifr.contentWindow.postMessage([image.outerHTML, num], '*');
-                    let canvas = document.createElement('canvas')
-                    wrapper.appendChild(canvas)
-                    parent.style = parentStyle
-                    console.log('wrapper width and height', wrapper.width, wrapper.height)
-                    wrapper.style.cssText = 'display:inline-block;position:relative;'
-                    image.style.cssText = 'position:absolute;z-index:1;'
-                    canvas.style.cssText = 'position:relative;z-index:2;'
-                    // canvas.style.cssText = 'position:absolute;top:0;left:0;'
-                    canvas.width = wrapper.width
-                    canvas.height = wrapper.height
-                    console.log('image width and height (1)', image.width, image.height)
-                    let displaySize = { width: wrapper.width, height: wrapper.height }
-                    // faceapi.matchDimensions(canvas, displaySize)
-                    // image.onload = async () => {
-                    //     let fullFaceDescriptions = await faceapi.detectAllFaces(image).withFaceLandmarks().withAgeAndGender()
-                    //     let resizedDetections = faceapi.resizeResults(fullFaceDescriptions, displaySize)
-                    //     if (resizedDetections.length > 0) {
-                    //         console.log('%cdetected some face!', 'color: green; font-weight: bold; font-size:1.5em')
-                    //         console.log('resized detections', resizedDetections)
-                    //     }
-                    //     faceapi.draw.drawDetections(canvas, resizedDetections)
-                    //     let ctx = canvas.getContext('2d')
-                    //     ctx.fillStyle = "black";
-                    //     console.log('div width and height', wrapper.getBoundingClientRect().width, wrapper.getBoundingClientRect().height)
-                    //     image.style.display = ''
-                    //     for (let detection of resizedDetections) {
-                    //         let box = detection.detection.box
-                    //         if (detection.gender === 'male') {
-                    //             console.log('gender is male')
-                    //         }
-                    //         ctx.fillRect(box.x, box.y, box.width, box.height);
-                    //         // ctx.fillRect(0, 0 , canvas.width, canvas.height)
-                    //         console.log(fullFaceDescriptions)
-                    //         console.log('coordinates', box.x, box.y)
-                    //         console.log('canvas width and height', canvas.width, canvas.height)
-                    //         console.log('image width and height', image.width, image.height)
-                    //         // console.log('wrapper width and height', wrapper.width, wrapper.height)
-                    //         console.log('box width and height', box.width, box.height)
-                    //     }
-                    // }
+                    let numKey = 'bila-fitnah-' + num
+                    numImageMap[numKey] = image
+                    let message = {
+                        outerHTML: image.outerHTML,
+                        numKey,
+                        clientWidth: image.clientWidth,
+                        clientHeight: image.clientHeight,
+                    }
+                    if (image.complete) {
+                        ifr.contentWindow.postMessage(message, '*');
+                    } else {
+                        image.onload = () => {
+                            ifr.contentWindow.postMessage(message, '*');
+                        }
+                    }
 
                 } catch (err) {
                     console.log(err)
                 }
             } else {
-                console.log('already seen image')
+                console.log('image already seen')
             }
         }
     }
-
 
     console.log('face recognition app loaded!')
 })()
@@ -134,15 +162,15 @@
  * @param {String} querySelector - Selector of element to wait for
  * @param {Integer} timeout - Milliseconds to wait before timing out, or 0 for no timeout              
  */
-function waitForElement(querySelector, timeout=0){
+function waitForElement(querySelector, timeout = 0) {
     const startTime = new Date().getTime();
-    return new Promise((resolve, reject)=>{
-        const timer = setInterval(()=>{
+    return new Promise((resolve, reject) => {
+        const timer = setInterval(() => {
             const now = new Date().getTime();
-            if(document.querySelector(querySelector)){
+            if (document.querySelector(querySelector)) {
                 clearInterval(timer);
                 resolve();
-            }else if(timeout && now - startTime >= timeout){
+            } else if (timeout && now - startTime >= timeout) {
                 clearInterval(timer);
                 reject();
             }
